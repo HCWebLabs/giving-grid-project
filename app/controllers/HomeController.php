@@ -9,6 +9,13 @@ declare(strict_types=1);
 
 namespace App\Controllers;
 
+require_once APP_PATH . '/Services/ListingService.php';
+require_once APP_PATH . '/Services/OrgService.php';
+require_once APP_PATH . '/Models/Listing.php';
+
+use App\Services\ListingService;
+use App\Services\OrgService;
+
 class HomeController
 {
     /**
@@ -16,14 +23,21 @@ class HomeController
      */
     public function index(): void
     {
-        // In Batch 2, we'll fetch live stats here:
-        // - Active needs count
-        // - Active offers count
-        // - Volunteer opportunities count
+        // Get live stats
+        $stats = ListingService::getActiveCounts();
+        $orgCount = OrgService::getVerifiedCount();
+        
+        // Get recent listings for each type
+        $recentNeeds = ListingService::getRecent('need', 3);
+        $recentOffers = ListingService::getRecent('offer', 3);
         
         render('pages/home', [
             'pageTitle' => 'Home',
-            'metaDescription' => 'The Giving Grid connects needs, surplus, and volunteers across Tennessee communities. Find help, offer resources, or volunteer your time.'
+            'metaDescription' => 'The Giving Grid connects needs, surplus, and volunteers across Tennessee communities. Find help, offer resources, or volunteer your time.',
+            'stats' => $stats,
+            'orgCount' => $orgCount,
+            'recentNeeds' => $recentNeeds,
+            'recentOffers' => $recentOffers,
         ]);
     }
 }
