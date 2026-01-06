@@ -15,6 +15,7 @@ declare(strict_types=1);
 // Load configuration
 require_once dirname(__DIR__) . '/config/app.php';
 require_once CONFIG_PATH . '/database.php';
+require_once CONFIG_PATH . '/constants.php';
 
 // Load helpers
 require_once APP_PATH . '/Helpers/view.php';
