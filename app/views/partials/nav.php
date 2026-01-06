@@ -64,6 +64,14 @@ $isOrgMember = $isLoggedIn && ($currentUser['role'] ?? '') === 'org_member';
                         </li>
                         <li>
                             <a 
+                                href="<?= url('/responses') ?>" 
+                                <?= isCurrentPathPrefix('/responses') ? 'aria-current="page"' : '' ?>
+                            >
+                                Messages
+                            </a>
+                        </li>
+                        <li>
+                            <a 
                                 href="<?= url('/dashboard') ?>" 
                                 <?= isCurrentPathPrefix('/dashboard') ? 'aria-current="page"' : '' ?>
                             >
