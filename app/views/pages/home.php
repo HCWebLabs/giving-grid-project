@@ -3,7 +3,6 @@
  * Homepage
  * 
  * Orientation + action entry points.
- * This is a placeholder that will be expanded in Batch 2.
  */
 ?>
 
@@ -25,22 +24,23 @@
     <div class="snapshot-container">
         <h2 class="sr-only">Current Grid Status</h2>
         <div class="snapshot-stats">
-            <div class="stat">
-                <span class="stat-number">&mdash;</span>
+            <a href="<?= url('/browse?type=need') ?>" class="stat stat-link">
+                <span class="stat-number"><?= number_format($stats['need'] ?? 0) ?></span>
                 <span class="stat-label">Active Needs</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number">&mdash;</span>
+            </a>
+            <a href="<?= url('/browse?type=offer') ?>" class="stat stat-link">
+                <span class="stat-number"><?= number_format($stats['offer'] ?? 0) ?></span>
                 <span class="stat-label">Offers</span>
-            </div>
-            <div class="stat">
-                <span class="stat-number">&mdash;</span>
-                <span class="stat-label">Volunteers</span>
-            </div>
+            </a>
+            <a href="<?= url('/browse?type=volunteer') ?>" class="stat stat-link">
+                <span class="stat-number"><?= number_format($stats['volunteer'] ?? 0) ?></span>
+                <span class="stat-label">Volunteer Opps</span>
+            </a>
+            <a href="<?= url('/organizations') ?>" class="stat stat-link">
+                <span class="stat-number"><?= number_format($orgCount ?? 0) ?></span>
+                <span class="stat-label">Organizations</span>
+            </a>
         </div>
-        <p class="snapshot-note">
-            <em>Live stats coming soon.</em>
-        </p>
     </div>
 </section>
 
@@ -49,12 +49,45 @@
         <div class="entry-card entry-needs">
             <h3>🟥 Needs Near You</h3>
             <p>See what local organizations need right now.</p>
-            <a href="<?= url('/browse?type=need') ?>">View All Needs →</a>
+            
+            <?php if (!empty($recentNeeds)): ?>
+                <ul class="entry-preview-list">
+                    <?php foreach ($recentNeeds as $listing): ?>
+                        <li>
+                            <a href="<?= listingUrl($listing->id) ?>">
+                                <?= e($listing->title) ?>
+                                <span class="entry-preview-meta">
+                                    <?= e($listing->getCountyName()) ?>
+                                </span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            
+            <a href="<?= url('/browse?type=need') ?>" class="entry-view-all">View All Needs →</a>
         </div>
+        
         <div class="entry-card entry-offers">
             <h3>🟩 Offers Available</h3>
             <p>Browse surplus resources from your community.</p>
-            <a href="<?= url('/browse?type=offer') ?>">View All Offers →</a>
+            
+            <?php if (!empty($recentOffers)): ?>
+                <ul class="entry-preview-list">
+                    <?php foreach ($recentOffers as $listing): ?>
+                        <li>
+                            <a href="<?= listingUrl($listing->id) ?>">
+                                <?= e($listing->title) ?>
+                                <span class="entry-preview-meta">
+                                    <?= e($listing->getCountyName()) ?>
+                                </span>
+                            </a>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+            
+            <a href="<?= url('/browse?type=offer') ?>" class="entry-view-all">View All Offers →</a>
         </div>
     </div>
 </section>
@@ -64,5 +97,6 @@
         <p class="trust-message">
             Verified organizations. Safety-first approach. No fees, ever.
         </p>
+        <a href="<?= url('/organizations') ?>" class="btn btn-secondary">View Organizations</a>
     </div>
 </section>
