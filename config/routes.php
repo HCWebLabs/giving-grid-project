@@ -58,13 +58,14 @@ return [
     'POST /listing/{id}/delete' => ['ListingController', 'delete', 'auth', 'csrf'],
     
     // Respond to listings ("I Can Help")
-    'GET /listing/{id}/respond' => ['ResponseController', 'form', 'auth'],
+    'GET /listing/{id}/respond' => ['ResponseController', 'create', 'auth'],
     'POST /listing/{id}/respond' => ['ResponseController', 'store', 'auth', 'csrf'],
     
     // Messages/coordination
-    'GET /messages' => ['ResponseController', 'index', 'auth'],
-    'GET /messages/{id}' => ['ResponseController', 'show', 'auth'],
-    'POST /messages/{id}' => ['ResponseController', 'reply', 'auth', 'csrf'],
+    'GET /responses' => ['ResponseController', 'index', 'auth'],
+    'GET /responses/{id}' => ['ResponseController', 'show', 'auth'],
+    'POST /responses/{id}/message' => ['ResponseController', 'sendMessage', 'auth', 'csrf'],
+    'POST /responses/{id}/status' => ['ResponseController', 'updateStatus', 'auth', 'csrf'],
     
     // -------------------------------------------------------------------------
     // Reporting (Optional Auth)
