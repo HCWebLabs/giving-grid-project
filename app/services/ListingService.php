@@ -297,4 +297,192 @@ class ListingService
     {
         // Will be implemented when we add response tracking
     }
+    
+    /**
+     * Create a new listing
+     * 
+     * @param array $data Validated listing data
+     * @param int $userId User creating the listing
+     * @param int|null $orgId Organization ID (if posting as org)
+     * @return int New listing ID
+     */
+    public static function create(array $data, int $userId, ?int $orgId = null): int
+    {
+        $sql = "
+            INSERT INTO listings (
+                type, title, description, category, quantity,
+                county, city, urgency, status, logistics,
+                contact_method, user_id, org_id, created_at, updated_at
+            ) VALUES (
+                :type, :title, :description, :category, :quantity,
+                :county, :city, :urgency, 'open', :logistics,
+                :contact_method, :user_id, :org_id, NOW(), NOW()
+            )
+        ";
+        
+        $listingId = Database::insert($sql, [
+            ':type' => $data['type'],
+            ':title' => $data['title'],
+            ':description' => $data['description'],
+            ':category' => $data['category'],
+            ':quantity' => $data['quantity'] ?? null,
+            ':county' => $data['county'],
+            ':city' => $data['city'] ?? null,
+            ':urgency' => $data['urgency'] ?? 'medium',
+            ':logistics' => $data['logistics'] ?? 'na',
+            ':contact_method' => $data['contact_method'] ?? null,
+            ':user_id' => $userId,
+            ':org_id' => $orgId,
+        ]);
+        
+        // Attach causes if provided
+        if (!empty($data['causes'])) {
+            self::syncCauses($listingId, $data['causes']);
+        }
+        
+        return $listingId;
+    }
+    
+    /**
+     * Update an existing listing
+     * 
+     * @param int $listingId Listing to update
+     * @param array $data Validated update data
+     * @return bool Success
+     */
+    public static function update(int $listingId, array $data): bool
+    {
+        $sets = ['updated_at = NOW()'];
+        $params = [':id' => $listingId];
+        
+        $allowedFields = [
+            'title', 'description', 'category', 'quantity',
+            'county', 'city', 'urgency', 'logistics', 'contact_method'
+        ];
+        
+        foreach ($allowedFields as $field) {
+            if (array_key_exists($field, $data)) {
+                $sets[] = "{$field} = :{$field}";
+                $params[":{$field}"] = $data[$field];
+            }
+        }
+        
+        $sql = "UPDATE listings SET " . implode(', ', $sets) . " WHERE id = :id";
+        
+        $affected = Database::execute($sql, $params);
+        
+        // Update causes if provided
+        if (isset($data['causes'])) {
+            self::syncCauses($listingId, $data['causes']);
+        }
+        
+        return $affected > 0;
+    }
+    
+    /**
+     * Update listing status
+     * 
+     * @param int $listingId Listing to update
+     * @param string $status New status
+     * @return bool Success
+     */
+    public static function updateStatus(int $listingId, string $status): bool
+    {
+        $params = [
+            ':id' => $listingId,
+            ':status' => $status,
+        ];
+        
+        $fulfilledAt = $status === 'fulfilled' ? ', fulfilled_at = NOW()' : '';
+        
+        $sql = "UPDATE listings SET status = :status, updated_at = NOW(){$fulfilledAt} WHERE id = :id";
+        
+        return Database::execute($sql, $params) > 0;
+    }
+    
+    /**
+     * Delete a listing (soft delete by closing)
+     * 
+     * @param int $listingId Listing to delete
+     * @return bool Success
+     */
+    public static function delete(int $listingId): bool
+    {
+        // We'll soft delete by setting status to closed
+        return self::updateStatus($listingId, 'closed');
+    }
+    
+    /**
+     * Hard delete a listing (admin only)
+     * 
+     * @param int $listingId Listing to delete
+     * @return bool Success
+     */
+    public static function hardDelete(int $listingId): bool
+    {
+        // Delete cause associations first
+        Database::execute("DELETE FROM listing_causes WHERE listing_id = :id", [':id' => $listingId]);
+        
+        // Delete responses
+        Database::execute("DELETE FROM responses WHERE listing_id = :id", [':id' => $listingId]);
+        
+        // Delete the listing
+        return Database::execute("DELETE FROM listings WHERE id = :id", [':id' => $listingId]) > 0;
+    }
+    
+    /**
+     * Sync causes for a listing
+     * 
+     * @param int $listingId Listing ID
+     * @param array $causeIds Array of cause IDs
+     */
+    public static function syncCauses(int $listingId, array $causeIds): void
+    {
+        // Remove existing
+        Database::execute("DELETE FROM listing_causes WHERE listing_id = :id", [':id' => $listingId]);
+        
+        // Add new (max 2)
+        $causeIds = array_slice(array_unique(array_filter($causeIds)), 0, 2);
+        
+        foreach ($causeIds as $causeId) {
+            Database::execute(
+                "INSERT IGNORE INTO listing_causes (listing_id, cause_id) VALUES (:listing_id, :cause_id)",
+                [':listing_id' => $listingId, ':cause_id' => (int) $causeId]
+            );
+        }
+    }
+    
+    /**
+     * Check if a user owns a listing
+     * 
+     * @param int $listingId Listing ID
+     * @param int $userId User ID
+     * @return bool
+     */
+    public static function isOwner(int $listingId, int $userId): bool
+    {
+        $count = Database::fetchColumn(
+            "SELECT COUNT(*) FROM listings WHERE id = :listing_id AND user_id = :user_id",
+            [':listing_id' => $listingId, ':user_id' => $userId]
+        );
+        
+        return (int) $count > 0;
+    }
+    
+    /**
+     * Check if a user can edit a listing (owner or admin)
+     * 
+     * @param int $listingId Listing ID
+     * @param int $userId User ID
+     * @param bool $isAdmin Is the user an admin
+     * @return bool
+     */
+    public static function canEdit(int $listingId, int $userId, bool $isAdmin = false): bool
+    {
+        if ($isAdmin) {
+            return true;
+        }
+        
+        return self::isOwner($listingId, $userId);
+    }
 }
