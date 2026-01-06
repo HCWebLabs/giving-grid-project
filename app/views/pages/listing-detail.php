@@ -134,6 +134,61 @@ $isLoggedIn = isset($_SESSION['user_id']);
         <!-- Sidebar / Action Panel -->
         <aside class="listing-detail-sidebar">
             
+            <!-- Owner Controls -->
+            <?php if ($isOwner): ?>
+                <div class="owner-panel">
+                    <h2>Manage Listing</h2>
+                    
+                    <div class="owner-actions">
+                        <a href="<?= url("/listing/{$listing->id}/edit") ?>" class="btn btn-secondary btn-block">
+                            Edit Listing
+                        </a>
+                        
+                        <?php if ($listing->status === 'open'): ?>
+                            <form method="POST" action="<?= url("/listing/{$listing->id}/status") ?>" class="status-form">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="status" value="fulfilled">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    Mark as Fulfilled
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="<?= url("/listing/{$listing->id}/status") ?>" class="status-form">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="status" value="closed">
+                                <button type="submit" class="btn btn-tertiary btn-block">
+                                    Close Listing
+                                </button>
+                            </form>
+                        <?php elseif ($listing->status === 'in_progress'): ?>
+                            <form method="POST" action="<?= url("/listing/{$listing->id}/status") ?>" class="status-form">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="status" value="fulfilled">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    Mark as Fulfilled
+                                </button>
+                            </form>
+                            
+                            <form method="POST" action="<?= url("/listing/{$listing->id}/status") ?>" class="status-form">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="status" value="open">
+                                <button type="submit" class="btn btn-tertiary btn-block">
+                                    Reopen Listing
+                                </button>
+                            </form>
+                        <?php elseif ($listing->status === 'closed'): ?>
+                            <form method="POST" action="<?= url("/listing/{$listing->id}/status") ?>" class="status-form">
+                                <?= csrfField() ?>
+                                <input type="hidden" name="status" value="open">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    Reopen Listing
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
+            
             <!-- Action Panel -->
             <?php if ($listing->isOpen()): ?>
                 <div class="action-panel">
