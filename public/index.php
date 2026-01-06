@@ -20,6 +20,9 @@ require_once CONFIG_PATH . '/constants.php';
 // Load helpers
 require_once APP_PATH . '/Helpers/view.php';
 require_once APP_PATH . '/Helpers/url.php';
+require_once APP_PATH . '/Helpers/flash.php';
+require_once APP_PATH . '/Helpers/csrf.php';
+require_once APP_PATH . '/Helpers/sanitize.php';
 
 // Start session
 if (session_status() === PHP_SESSION_NONE) {
