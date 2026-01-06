@@ -1,0 +1,41 @@
+# Environment and secrets
+.env
+
+# Dependencies
+/vendor/
+
+# Storage (logs, cache, uploads)
+/storage/logs/*
+/storage/cache/*
+/storage/uploads/*
+!storage/logs/.gitkeep
+!storage/cache/.gitkeep
+!storage/uploads/.gitkeep
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Composer
+composer.lock
+
+# Node (if added later)
+node_modules/
+package-lock.json
+
+# Debug and profiling
+*.log
+*.sql.gz
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
