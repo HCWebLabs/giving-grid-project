@@ -83,5 +83,6 @@ return [
     'POST /admin/verify/{id}' => ['AdminController', 'verify', 'auth', 'admin', 'csrf'],
     'POST /admin/reject/{id}' => ['AdminController', 'reject', 'auth', 'admin', 'csrf'],
     'GET /admin/reports' => ['AdminController', 'reportsQueue', 'auth', 'admin'],
+    'GET /admin/reports/{id}' => ['AdminController', 'viewReport', 'auth', 'admin'],
     'POST /admin/reports/{id}/resolve' => ['AdminController', 'resolveReport', 'auth', 'admin', 'csrf'],
 ];
